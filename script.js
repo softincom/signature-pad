@@ -38,7 +38,10 @@ function stopDraw() {
 }
 
 document.getElementById('clear').onclick = () => {
+window.onload = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(0,0,0,0)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 };
 
 document.getElementById('save').onclick = () => {
