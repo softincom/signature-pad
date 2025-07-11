@@ -2,6 +2,11 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 
+// Прозрачный фон при загрузке
+window.onload = () => {
+  clearCanvas();
+};
+
 canvas.addEventListener('touchstart', startDraw);
 canvas.addEventListener('touchmove', draw);
 canvas.addEventListener('touchend', stopDraw);
@@ -37,11 +42,14 @@ function stopDraw() {
   drawing = false;
 }
 
-document.getElementById('clear').onclick = () => {
-window.onload = () => {
+function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "rgba(0,0,0,0)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+document.getElementById('clear').onclick = () => {
+  clearCanvas();
 };
 
 document.getElementById('save').onclick = () => {
@@ -52,17 +60,22 @@ document.getElementById('save').onclick = () => {
   link.click();
 };
 
-document.getElementById('send').onclick = () => {
-  canvas.toBlob(blob => {
-    const file = new File([blob], "signature.png", { type: "image/png" });
+document.getElementById('send').onclick = async () => {
+  canvas.toBlob(async (blob) => {
+    const zip = new JSZip();
+    zip.file("signature.png", blob);
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const file = new File([zipBlob], "signature.zip", { type: "application/zip" });
+
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
         title: "Моя подпись",
-        text: "Отправляю подпись"
+        text: "Отправляю архив с подписью"
       });
     } else {
-      alert("Ваш браузер не поддерживает отправку файлов через Share API.");
+      alert("Ваш браузер не поддерживает отправку ZIP через Share API.");
     }
   });
 };
